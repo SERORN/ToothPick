@@ -107,6 +107,15 @@ export enum FormaPago {
   INTERMEDIARIO = '31',      // Intermediario pagos
   POR_DEFINIR = '99'         // Por definir
 }
+
+// 🧾 Interface principal de factura
+export interface IInvoice extends mongoose.Document {
+  // Timbre fiscal digital  
+  timbrado: {
+    uuid: string;
+    fechaTimbrado: Date;
+    selloCfd: string;
+    noCertificadoSat: string;
     selloSat: string;
   };
   

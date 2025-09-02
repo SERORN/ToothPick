@@ -1,11 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IUser extend    role: {
-      type: String,
-      enum: ['admin', 'provider', 'distributor', 'customer', 'dentist', 'patient'],
-      required: true
-    },
-    isActive: { type: Boolean, default: true },
+export interface IUser extends Document {
+  _id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: 'admin' | 'provider' | 'distributor' | 'customer' | 'dentist' | 'patient';
+  isActive: boolean;
     
     // 🌐 CONFIGURACIÓN DE LOCALIZACIÓN E INTERNACIONALIZACIÓN
     preferredLanguage: {
