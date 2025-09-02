@@ -381,33 +381,3 @@ export default function AdminDashboard() {
     </div>
   )
 }
-              <h2 className="text-xl font-semibold mb-2 text-gray-800">� Gestionar Usuarios</h2>
-              <p className="text-gray-600 mb-4">Administrar roles, permisos y estado de usuarios.</p>
-              <div className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition inline-block">
-                Ir a Gestión
-              </div>
-            </Link>
-
-            <Link href="/admin/products" className="bg-white shadow-md rounded-xl p-6 hover:shadow-lg transition-shadow block">
-              <h2 className="text-xl font-semibold mb-2 text-gray-800">📦 Gestionar Productos</h2>
-              <p className="text-gray-600 mb-4">Moderar productos y controlar activaciones.</p>
-              <div className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition inline-block">
-                Ir a Productos
-              </div>
-            </Link>
-
-            <Link href="/admin/orders" className="bg-white shadow-md rounded-xl p-6 hover:shadow-lg transition-shadow block">
-              <h2 className="text-xl font-semibold mb-2 text-gray-800">📋 Ver Órdenes</h2>
-              <p className="text-gray-600 mb-4">Monitorear todas las transacciones de la plataforma.</p>
-              <div className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition inline-block">
-                Ver Órdenes
-              </div>
-            </Link>
-
-          </div>
-
-        </div>
-      </main>
-    </div>
-  )
-}

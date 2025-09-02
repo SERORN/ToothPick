@@ -1,8 +1,5 @@
 import mongoose from 'mongoose';
-import {   // Conectar a la base de datos antes de cada operación
-  private async ensureConnection() {
-    await dbConnect()
-  }t } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import RewardItem, { IRewardItem } from '@/lib/models/RewardItem';
 import RewardClaim, { IRewardClaim } from '@/lib/models/RewardClaim';
 import dbConnect from '@/lib/db';
@@ -46,7 +43,7 @@ class RewardStoreService {
   
   // Conectar a la base de datos antes de cada operación
   private async ensureConnection() {
-    await connectToDatabase();
+    await dbConnect();
   }
 
   /**

@@ -501,23 +501,5 @@ export class IntegrationService {
   }
 }
 
-// Servicio de Criptografía (placeholder - implementación simple)
-class CryptoService {
-  private key: string;
-  
-  constructor(key: string) {
-    this.key = key;
-  }
-  
-  async encrypt(text: string): Promise<string> {
-    // Implementación básica - en producción usar crypto más robusto
-    return Buffer.from(text).toString('base64');
-  }
-  
-  async decrypt(encryptedText: string): Promise<string> {
-    // Implementación básica - en producción usar crypto más robusto
-    return Buffer.from(encryptedText, 'base64').toString();
-  }
-}
 
 export default IntegrationService;

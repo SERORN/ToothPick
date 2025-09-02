@@ -96,39 +96,3 @@ export default function DataToolsPage() {
     </div>
   );
 }
-            <tr>
-              <th className="p-2 text-left">ID</th>
-              <th className="p-2 text-left">Colecciones</th>
-              <th className="p-2 text-left">Formato</th>
-              <th className="p-2 text-left">Fecha</th>
-              <th className="p-2 text-left">Descargar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {exports.map((e) => (
-              <tr key={e._id} className="border-t">
-                <td className="p-2">{e._id}</td>
-                <td className="p-2">{e.collections.join(', ')}</td>
-                <td className="p-2 uppercase">{e.format}</td>
-                <td className="p-2">{new Date(e.createdAt).toLocaleString()}</td>
-                <td className="p-2">
-                  {e.filePath ? (
-                    <a
-                      href={`/backups/${e.filePath.split('/').pop()}`}
-                      download
-                      className="text-blue-600 underline"
-                    >
-                      Descargar
-                    </a>
-                  ) : (
-                    <span className="text-red-500">No disponible</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}

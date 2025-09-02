@@ -2,12 +2,14 @@
 // ✅ Configuración global para todas las pruebas
 
 import '@testing-library/jest-dom';
-import { TextEncoder, TextDecoder } from 'util';
+import React from 'react';
+import { fetch, Request, Response } from 'undici';
 import { server } from './mocks/server';
 
 // Polyfills globales
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder as any;
+global.fetch = fetch as any;
+global.Request = Request as any;
+global.Response = Response as any;
 
 // Variables de entorno para testing
 process.env.NODE_ENV = 'test';
@@ -83,9 +85,15 @@ jest.mock('react-hot-toast', () => ({
 // Mock de framer-motion
 jest.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    span: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-    button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+    div: ({ children, ...props }: any) => {
+      return React.createElement('div', props, children);
+    },
+    span: ({ children, ...props }: any) => {
+      return React.createElement('span', props, children);
+    },
+    button: ({ children, ...props }: any) => {
+      return React.createElement('button', props, children);
+    },
   },
   AnimatePresence: ({ children }: any) => children,
 }));

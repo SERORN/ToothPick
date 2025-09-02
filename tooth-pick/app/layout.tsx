@@ -1,20 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from 'react-hot-toast';
 import { CartProvider } from '@/lib/contexts/CartContext';
 import CartSidebar from '@/components/CartSidebar';
 import CartButton from '@/components/CartButton';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Tooth Pick - Sistema Dental",
@@ -28,8 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      <body className="antialiased"
       >
         <CartProvider>
           <Toaster position="top-right" />

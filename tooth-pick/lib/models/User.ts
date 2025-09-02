@@ -1,145 +1,148 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IUser extend    role: {
-      type: String,
-      enum: ['admin', 'provider', 'distributor', 'customer', 'dentist', 'patient'],
-      required: true
-    },
-    isActive: { type: Boolean, default: true },
-    
-    // 🌐 CONFIGURACIÓN DE LOCALIZACIÓN E INTERNACIONALIZACIÓN
-    preferredLanguage: {
-      type: String,
-      enum: ['es', 'en', 'pt', 'de'],
-      default: 'es'
-    },
-    preferredCurrency: {
-      type: String,
-      enum: ['MXN', 'USD', 'BRL', 'ARS', 'COP', 'CLP', 'EUR'],
-      default: 'MXN'
-    },
-    timezone: {
-      type: String,
-      default: 'America/Mexico_City'
-    },
-    dateFormat: {
-      type: String,
-      default: 'DD/MM/YYYY'
-    },
-    numberFormat: {
-      decimal: { type: String, default: ',' },
-      thousands: { type: String, default: '.' }
-    },
-    
-    // 🏪 CAMPOS PARA DISTRIBUIDORES
-    stripeAccountId: { type: String, sparse: true },
-    stripeOnboardingCompleted: { type: Boolean, default: false }, {
+export interface IUser extends Document {
+  _id: string;
   name: string;
   email: string;
   password: string;
   role: 'admin' | 'provider' | 'distributor' | 'customer' | 'dentist' | 'patient';
   isActive: boolean;
   
-  // � CONFIGURACIÓN DE LOCALIZACIÓN E INTERNACIONALIZACIÓN
-  preferredLanguage?: 'es' | 'en' | 'pt' | 'de';
-  preferredCurrency?: 'MXN' | 'USD' | 'BRL' | 'ARS' | 'COP' | 'CLP' | 'EUR';
-  timezone?: string;
-  dateFormat?: string;
-  numberFormat?: {
+  // 🌐 CONFIGURACIÓN DE LOCALIZACIÓN E INTERNACIONALIZACIÓN
+  preferredLanguage: 'es' | 'en' | 'pt' | 'de';
+  preferredCurrency: 'MXN' | 'USD' | 'BRL' | 'ARS' | 'COP' | 'CLP' | 'EUR';
+  timezone: string;
+  dateFormat: string;
+  numberFormat: {
     decimal: string;
     thousands: string;
   };
   
-  // �🏪 CAMPOS PARA DISTRIBUIDORES
+  // 🏪 CAMPOS PARA DISTRIBUIDORES
   stripeAccountId?: string;
-  stripeOnboardingCompleted?: boolean;
-  
-  // 🧑‍⚕️ CAMPOS PARA CLIENTES FINALES B2C
-  phone?: string;
-  address?: {
+  stripeOnboardingCompleted: boolean;
+  businessName?: string;
+  businessType?: string;
+  taxId?: string;
+  businessAddress?: {
     street: string;
     city: string;
     state: string;
-    zipCode: string;
+    postalCode: string;
     country: string;
   };
+  bankAccount?: {
+    accountNumber: string;
+    routingNumber: string;
+    accountHolderName: string;
+  };
+  commission: {
+    b2bRate: number;
+    b2cRate: number;
+  };
   
-  // 🎁 PROGRAMA DE RECOMPENSAS (virtual)
-  rewardPoints?: number;
+  // 👨‍⚕️ CAMPOS PARA DENTISTAS
+  specialization?: string[];
+  licenseNumber?: string;
+  experienceYears?: number;
+  about?: string;
+  education?: {
+    degree: string;
+    institution: string;
+    year: number;
+  }[];
+  certifications?: {
+    name: string;
+    institution: string;
+    year: number;
+    expirationYear?: number;
+  }[];
+  availableHours?: {
+    monday?: { start: string; end: string; };
+    tuesday?: { start: string; end: string; };
+    wednesday?: { start: string; end: string; };
+    thursday?: { start: string; end: string; };
+    friday?: { start: string; end: string; };
+    saturday?: { start: string; end: string; };
+    sunday?: { start: string; end: string; };
+  };
+  consultationFee?: number;
+  acceptsInsurance?: boolean;
+  languages?: string[];
+  profileImage?: string;
+  clinicAddress?: {
+    name: string;
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    phone?: string;
+  };
   
-  // 👥 SISTEMA DE REFERIDOS
-  referralCode?: string;        // Código único para invitar a otros
-  referredBy?: string;          // Código del usuario que lo refirió
-  referralRewardClaimed?: boolean; // Si ya recibió recompensa por referido
+  // 🔒 AUTENTICACIÓN Y SEGURIDAD
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  twoFactorEnabled: boolean;
+  lastLogin?: Date;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
   
-  // 🦷 CAMPOS ESPECÍFICOS PARA DENTISTAS
-  dentalLicense?: string;       // Cédula profesional
-  specialties?: string[];       // Especialidades: ['ortodoncista', 'endodoncista']
-  clinicName?: string;          // Nombre de la clínica
-  clinicAddress?: string;       // Dirección de la clínica
-  consultationFee?: number;     // Precio de consulta base
-  yearsExperience?: number;     // Años de experiencia
-  bio?: string;                 // Descripción profesional
-  profileImageUrl?: string;     // Foto de perfil
-  workingHours?: {              // Horario de trabajo
-    [key: string]: {            // 'monday', 'tuesday', etc.
-      start: string;            // '09:00'
-      end: string;              // '18:00'
-      enabled: boolean;
+  // 🎯 GAMIFICACIÓN Y FIDELIZACIÓN
+  loyaltyTier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  rewardPoints: number;
+  totalSpent: number;
+  referralCode: string;
+  referredBy?: string;
+  referralRewardsEarned: number;
+  gameProfile?: {
+    level: number;
+    experience: number;
+    badges: string[];
+    achievements: string[];
+    streaks: {
+      login: number;
+      purchase: number;
+      review: number;
     };
   };
-  subscriptionPlan?: 'basic' | 'pro' | 'premium'; // Plan SaaS
-  subscriptionStatus?: 'active' | 'inactive' | 'trial';
+  
+  // 📊 ANALYTICS Y COMPORTAMIENTO
+  lastActiveAt?: Date;
+  accountCreatedAt: Date;
+  profileCompleteness: number;
+  preferences?: {
+    notifications: {
+      email: boolean;
+      sms: boolean;
+      push: boolean;
+      marketing: boolean;
+    };
+    privacy: {
+      showProfile: boolean;
+      allowMessages: boolean;
+    };
+  };
+  
+  // 🏆 SUSCRIPCIÓN Y PLAN
+  subscriptionPlan: 'free' | 'basic' | 'premium' | 'enterprise';
+  subscriptionStatus: 'active' | 'inactive' | 'canceled' | 'past_due';
+  subscriptionStartDate?: Date;
+  subscriptionEndDate?: Date;
+  stripeCustomerId?: string;
   stripeSubscriptionId?: string;
-  freeTrialUsed?: boolean;
   
-  // 🚀 SISTEMA DE ONBOARDING GUIADO (FASE 34)
-  onboardingStatus?: {
-    isCompleted: boolean;
-    currentStep: string;
-    completedSteps: string[];
-    startedAt: Date;
-    completedAt?: Date;
-    skippedSteps: string[];
-    lastActiveAt: Date;
-    progressPercentage: number;
-  };
+  // 📱 METADATA
+  metadata?: Record<string, any>;
+  tags?: string[];
+  notes?: string;
   
-  // 🔐 SISTEMA DE VERIFICACIÓN DE PROVEEDORES/DISTRIBUIDORES (FASE 35)
-  verificationStatus?: {
-    isVerified: boolean;
-    status: 'not_requested' | 'pending' | 'in_review' | 'approved' | 'rejected' | 'documents_required';
-    requestId?: string;
-    verifiedAt?: Date;
-    verifiedBy?: string;
-    rejectionCount: number;
-    canSell: boolean;
-    canReceiveOrders: boolean;
-    lastVerificationAttempt?: Date;
-    verificationScore?: number;
-  };
-  
-  // 🧑‍⚕️ CAMPOS ESPECÍFICOS PARA PACIENTES
-  birthDate?: Date;             // Fecha de nacimiento
-  gender?: 'male' | 'female' | 'other';
-  emergencyContact?: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-  medicalHistory?: string[];    // Historial médico relevante
-  allergies?: string[];         // Alergias conocidas
-  
-  // 🔔 PREFERENCIAS DE RECORDATORIOS
-  prefersReminderBy: 'email' | 'sms' | 'whatsapp';
-  reminderHoursBefore: number;  // Horas antes de la cita para recordatorio
-  acceptsMarketingMessages: boolean;
-  
+  // Timestamps
   createdAt: Date;
   updatedAt: Date;
-}
-
-const UserSchema: Schema = new Schema<IUser>(
+}const UserSchema: Schema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
