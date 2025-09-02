@@ -215,5 +215,5 @@ export default function DistributorDashboard() {
       </main>
     </div>
     </GamificationProvider>
-  )
+  );
 }
