@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: toothpick_postgres
+    environment:
+      POSTGRES_USER: toothpick_user
+      POSTGRES_PASSWORD: toothpick_password
+      POSTGRES_DB: toothpick_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - toothpick_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U toothpick_user -d toothpick_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis para caching y sesiones
+  redis:
+    image: redis:7-alpine
+    container_name: toothpick_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - toothpick_network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend FastAPI
+  backend:
+    build: ./backend
+    container_name: toothpick_backend
+    environment:
+      - DATABASE_URL=postgresql://toothpick_user:toothpick_password@postgres:5432/toothpick_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=your-super-secret-key-change-in-production
+      - DEBUG=False
+      - ENVIRONMENT=production
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - toothpick_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Frontend Next.js
+  frontend:
+    build: 
+      context: ./tooth-pick
+      dockerfile: Dockerfile
+    container_name: toothpick_frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - toothpick_network
+    restart: unless-stopped
+
+  # Landing Page
+  landing:
+    build:
+      context: ./tooth-pick/landing
+      dockerfile: Dockerfile
+    container_name: toothpick_landing
+    ports:
+      - "3001:3001"
+    networks:
+      - toothpick_network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: toothpick_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+      - landing
+    networks:
+      - toothpick_network
+    restart: unless-stopped
+
+  # Monitoring con Prometheus (opcional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: toothpick_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - toothpick_network
+    restart: unless-stopped
+
+  # Grafana para dashboards (opcional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: toothpick_grafana
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - toothpick_network
+    restart: unless-stopped
+
+networks:
+  toothpick_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:

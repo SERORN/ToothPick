@@ -1,0 +1,8 @@
+# Vercel ignore file
+# Solo ignorar archivos de desarrollo y testing
+/tests
+/*.test.*
+/jest.config.js
+/.env.test
+/MIGRACION_COMPLETA.md
+/.vercel-trigger.txt

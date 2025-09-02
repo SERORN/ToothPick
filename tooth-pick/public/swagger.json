@@ -1,0 +1,505 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ToothPick API",
+    "description": "API completa para la plataforma dental B2B/B2C ToothPick",
+    "version": "1.0.0",
+    "contact": {
+      "name": "ToothPick Team",
+      "email": "support@toothpick.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Servidor de desarrollo"
+    },
+    {
+      "url": "https://toothpick.vercel.app/api",
+      "description": "Servidor de producción"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "email": { "type": "string" },
+          "role": { 
+            "type": "string", 
+            "enum": ["admin", "provider", "distributor", "clinic", "patient", "dentist"] 
+          },
+          "isActive": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "price": { "type": "number" },
+          "category": { "type": "string" },
+          "brand": { "type": "string" },
+          "stock": { "type": "integer" },
+          "isActive": { "type": "boolean" }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/OrderItem" } },
+          "total": { "type": "number" },
+          "status": { 
+            "type": "string", 
+            "enum": ["pending", "confirmed", "shipped", "delivered", "cancelled"] 
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "productId": { "type": "string" },
+          "quantity": { "type": "integer" },
+          "price": { "type": "number" }
+        }
+      },
+      "AnalyticsEvent": {
+        "type": "object",
+        "properties": {
+          "eventType": { "type": "string" },
+          "userId": { "type": "string" },
+          "userRole": { "type": "string" },
+          "entityType": { "type": "string" },
+          "entityId": { "type": "string" },
+          "metadata": { "type": "object" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Invoice": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "orderId": { "type": "string" },
+          "folio": { "type": "string" },
+          "total": { "type": "number" },
+          "status": { 
+            "type": "string", 
+            "enum": ["draft", "sent", "paid", "cancelled"] 
+          },
+          "pdfUrl": { "type": "string" },
+          "xmlUrl": { "type": "string" }
+        }
+      },
+      "SupportTicket": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "subject": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { 
+            "type": "string", 
+            "enum": ["open", "in_progress", "resolved", "closed"] 
+          },
+          "priority": { 
+            "type": "string", 
+            "enum": ["low", "medium", "high", "urgent"] 
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Registrar nuevo usuario",
+        "tags": ["Autenticación"],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" },
+                  "role": { "type": "string" },
+                  "name": { "type": "string" }
+                },
+                "required": ["email", "password", "role", "name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario registrado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "400": { "description": "Datos inválidos" },
+          "409": { "description": "Usuario ya existe" }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "Listar usuarios",
+        "tags": ["Usuarios"],
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Filtrar por rol"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer" },
+            "description": "Número de página"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer" },
+            "description": "Elementos por página"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/User" }
+                    },
+                    "total": { "type": "integer" },
+                    "page": { "type": "integer" },
+                    "totalPages": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" },
+          "403": { "description": "Permisos insuficientes" }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "summary": "Listar productos",
+        "tags": ["Productos"],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Filtrar por categoría"
+          },
+          {
+            "name": "brand",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Filtrar por marca"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Búsqueda de texto"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de productos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Product" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear producto",
+        "tags": ["Productos"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Product" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Producto creado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Product" }
+              }
+            }
+          },
+          "400": { "description": "Datos inválidos" },
+          "401": { "description": "No autorizado" },
+          "403": { "description": "Solo providers pueden crear productos" }
+        }
+      }
+    },
+    "/orders": {
+      "get": {
+        "summary": "Listar pedidos",
+        "tags": ["Pedidos"],
+        "responses": {
+          "200": {
+            "description": "Lista de pedidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Order" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear pedido",
+        "tags": ["Pedidos"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/OrderItem" }
+                  },
+                  "shippingAddress": { "type": "object" },
+                  "paymentMethod": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pedido creado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Order" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/log": {
+      "post": {
+        "summary": "Registrar evento de analytics",
+        "tags": ["Analytics"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AnalyticsEvent" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Evento registrado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AnalyticsEvent" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/metrics": {
+      "get": {
+        "summary": "Obtener métricas",
+        "tags": ["Analytics"],
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" },
+            "description": "Fecha de inicio"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" },
+            "description": "Fecha de fin"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Métricas obtenidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "overview": { "type": "object" },
+                    "business": { "type": "object" },
+                    "engagement": { "type": "object" },
+                    "charts": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/invoices": {
+      "post": {
+        "summary": "Generar factura",
+        "tags": ["Facturación"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": { "type": "string" },
+                  "customerData": { "type": "object" }
+                },
+                "required": ["orderId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Factura generada",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Invoice" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/support/tickets": {
+      "get": {
+        "summary": "Listar tickets de soporte",
+        "tags": ["Soporte"],
+        "responses": {
+          "200": {
+            "description": "Lista de tickets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/SupportTicket" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear ticket de soporte",
+        "tags": ["Soporte"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subject": { "type": "string" },
+                  "description": { "type": "string" },
+                  "priority": { "type": "string" }
+                },
+                "required": ["subject", "description"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ticket creado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SupportTicket" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Autenticación",
+      "description": "Endpoints de registro y login"
+    },
+    {
+      "name": "Usuarios",
+      "description": "Gestión de usuarios"
+    },
+    {
+      "name": "Productos",
+      "description": "Catálogo de productos dentales"
+    },
+    {
+      "name": "Pedidos",
+      "description": "Gestión de pedidos y carrito"
+    },
+    {
+      "name": "Analytics",
+      "description": "Métricas y eventos de analytics"
+    },
+    {
+      "name": "Facturación",
+      "description": "Facturación electrónica CFDI"
+    },
+    {
+      "name": "Soporte",
+      "description": "Sistema de tickets de soporte"
+    }
+  ]
+}

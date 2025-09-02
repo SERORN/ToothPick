@@ -1,0 +1,29 @@
+{
+  "name": "toothpick-landing",
+  "version": "1.0.0",
+  "description": "ToothPick Landing Page - Modern dental platform marketing site",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "build": "echo 'Static site - no build needed'",
+    "dev": "npx serve . -l 3001",
+    "preview": "npx serve . -l 3001"
+  },
+  "keywords": [
+    "dental",
+    "platform",
+    "healthcare",
+    "dentist",
+    "patients",
+    "marketplace",
+    "landing-page"
+  ],
+  "author": "ToothPick Team",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
